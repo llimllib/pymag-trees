@@ -98,7 +98,7 @@ def p(tree):
         if not newlevel: break
         level = newlevel
 
-root = gentree("/Users/llimllib/Movies")
-root.children.reverse()
-drawtree = reingold_tilford(root)
-p(drawtree)
+#root = gentree("/Users/llimllib/Movies")
+#root.children.reverse()
+#drawtree = reingold_tilford(root)
+#p(drawtree)
