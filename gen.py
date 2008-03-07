@@ -4,8 +4,8 @@ class Tree:
     def __init__(self, node="", children=None):
         self.node = node
         self.width = len(node)
-        if not children:
-            self.children = []
+        if children: self.children = children
+        else:        self.children = []
     
     def __str__(self): 
         return "%s - %d children" % (self.node, len(self.children))
