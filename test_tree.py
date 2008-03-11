@@ -9,24 +9,40 @@ class TestDrawTree(unittest.TestCase):
                  Tree("r")])
         dt = self.f(tree)
 
-        self.assertEqual(dt.x, 1)
-        self.assertEqual(dt.children[0].x, 0)
-        self.assertEqual(dt.children[1].x, 2)
+        self.assertTree(dt, [1, [0, 2]])
+
+    def assertTree(self, tree, expected):
+        self.assertEqual(tree.x, expected[0])
+        for i in range(1, len(tree.children)):
+            child = tree.children[i-1]
+            exp = expected[i]
+            if isinstance(exp, int): self.assertTree(child, [exp])
+            else:                    self.assertTree(child, exp)
 
     def testDeepLeft(self):
         tree = Tree("root", [
                  Tree("l1", [
                    Tree("l2", [
-                     Tree("l3")])]),
+                     Tree("l3", [
+                       Tree("l4")])])]),
                  Tree("r1")])
         dt = self.f(tree)
+        expected = [1, [0, [0, [0, [0]]]], 2]
 
-        eq = self.assertEqual
-        eq(dt.x, 1)
-        eq(dt.children[0].x, 0)
-        eq(dt.children[0].children[0].x, 0)
-        eq(dt.children[0].children[0].children[0].x, 0)
-        eq(dt.children[1].x, 2)
+        self.assertTree(dt, expected)
+
+    def testDeepRight(self):
+        tree = Tree("root", [
+                 Tree("r1"),
+                 Tree("l1", [
+                   Tree("l2", [
+                     Tree("l3", [
+                       Tree("l4")])])])
+                 ])
+        dt = self.f(tree)
+        expected = [1, 0, [2, [2, [2, [2]]]]]
+
+        self.assertTree(dt, expected)
 
 class TestNaive(TestDrawTree):
     def setUp(self): 
