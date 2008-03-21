@@ -45,8 +45,8 @@ class TestDrawTree(unittest.TestCase):
         self.assertTree(dt, expected)
 
     def testBalanced(self):
-        """It helps to draw these out on paper and have an editor that matches
-        parentheses :)"""
+        #It helps to draw these out on paper and have an editor that matches
+        #parentheses :)
         tree = Tree("root", [
                  Tree("l1", [
                    Tree("l2", [
@@ -66,6 +66,8 @@ class TestNaive(TestDrawTree):
         self.f = reingold_naive.reingold_tilford
 
 class TestThread(TestDrawTree):
+    #TODO: My current tests didn't make the lattach bug fail... write a test
+    #      that does. (See r116, reingold_thread.py)
     def setUp(self): 
         import reingold_thread
         self.f = reingold_thread.reingold_tilford
