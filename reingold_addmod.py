@@ -69,7 +69,7 @@ def rattach(left, right, depth):
 
 def lattach(left, right, depth):
     if depth > 1:
-        return rattach(left.left(), right.left(), depth-1)
+        return lattach(left.left(), right.left(), depth-1)
     left.thread = left.left()
 
 def addtotree(tree, val):
