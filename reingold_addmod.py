@@ -39,6 +39,7 @@ def reingold_tilford(tree, depth=0):
     dt.children = [left, right]
     dt.x, dt.mod = fix_subtrees(left, right)
     return dt
+#TODO: unify the tree structures?
 
 #place the right subtree as close to the left subtree as possible
 def fix_subtrees(left, right):
