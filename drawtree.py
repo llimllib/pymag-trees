@@ -3,8 +3,11 @@ from demo_trees import trees
 import reingold_thread; reload(reingold_thread)
 from reingold_thread import reingold_tilford as rt
 #from reingold_naive import reingold_tilford as rt
+from buchheim import buchheim
 
-t = rt(trees[5])
+#print trees[5][0]
+t = buchheim(trees[5])
+#t = rt(trees[5])
 
 r = 30
 rh = r*1.5
