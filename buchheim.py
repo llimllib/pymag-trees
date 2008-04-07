@@ -76,8 +76,8 @@ def apportion(v, default_ancestor):
         sil = vil.mod
         sol = vol.mod
         while vil.right() and vir.left():
-            #print "here"
-            #print "%s %s %s %s" % (vil.tree, vir.tree, vol.tree, vor.tree)
+            if str(v.tree) == "r1":
+                print "%s %s %s %s" % (vil.tree, vir.tree, vol.tree, vor.tree)
             vil = vil.right()
             vir = vir.left()
             vol = vol.left()
@@ -135,5 +135,5 @@ if __name__ == "__main__":
     from demo_trees import trees
     from reingold_thread import p as printtree
 
-    dt = buchheim(trees[2])
+    dt = buchheim(trees[5])
     printtree(dt)
