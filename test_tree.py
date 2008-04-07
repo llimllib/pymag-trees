@@ -7,6 +7,7 @@ import unittest
 class TestDrawTree(unittest.TestCase):
     def assertTree(self, tree, expected):
         self.assertEqual(tree.x, expected[0])
+        print tree.x, expected[0]
         for i in range(1, len(tree.children)+1):
             child = tree.children[i-1]
             exp = expected[i]
@@ -46,6 +47,7 @@ class TestDrawTree(unittest.TestCase):
         #single children directly underneath parents
         dt = self.f(trees[5])
         expected = [3, [2, 1, [3, 2, 4]], [6, [6, [6, [6, [5, [4, 3, 5], 6]]]]]]
+        self.assertTree(dt, expected)
 
 class TestNaive(TestDrawTree):
     def setUp(self): 
