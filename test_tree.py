@@ -76,5 +76,5 @@ if __name__ == "__main__":
     suite = load(TestNaive)
     suite.addTests(load(TestThread))
     #suite.addTests(load(TestAddMod))
-    #suite.addTests(load(TestBuchheim))
+    suite.addTests(load(TestBuchheim))
     unittest.TextTestRunner(verbosity=2).run(suite)
