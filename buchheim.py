@@ -28,7 +28,7 @@ class DrawTree(object):
         if self.parent:
             for node in self.parent.children:
                 if node == self: return n
-                else:            n = self
+                else:            n = node
         return n
 
     def get_lmost_sibling(self):
@@ -75,11 +75,11 @@ def apportion(v, default_ancestor):
         sir = sor = v.mod
         sil = vil.mod
         sol = vol.mod
-        right = vil.right()
-        left = vir.left()
-        while right and left:
-            vil = right
-            vir = left
+        while vil.right() and vir.left():
+            #print "here"
+            #print "%s %s %s %s" % (vil.tree, vir.tree, vol.tree, vor.tree)
+            vil = vil.right()
+            vir = vir.left()
             vol = vol.left()
             vor = vor.right()
             vor.ancestor = v
@@ -88,9 +88,8 @@ def apportion(v, default_ancestor):
                 move_subtree(ancestor(vil, v, default_ancestor), v, shift)
                 sir = sir + shift
                 sor = sor + shift
-            sil += vil.mod #XXX: the paper doesn't have a subscript on vi?
-            sir += vir.mod #XXX: the indentation on these ones isn't
-                           #     clear. Are they in the while loop?
+            sil += vil.mod
+            sir += vir.mod
             sol += vol.mod
             sor += vor.mod
         right = vil.right()
@@ -136,5 +135,5 @@ if __name__ == "__main__":
     from demo_trees import trees
     from reingold_thread import p as printtree
 
-    dt = buchheim(trees[0])
+    dt = buchheim(trees[2])
     printtree(dt)
