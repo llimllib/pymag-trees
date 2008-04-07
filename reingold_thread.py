@@ -46,9 +46,8 @@ def fix_subtrees(left, right):
     if len(wl) != len(wr):
         fix_threads(left, right, len(wl), len(wr))
 
-    diff = max(map(lambda (x,y): x-y, zip(wl,wr))) + 1
-    #stick to the integers
-    diff += (right.x + diff + left.x) % 2
+    diff = max(x-y for x,y in zip(wl,wr)) + 1
+    diff += (right.x + diff + left.x) % 2       #stick to the integers
 
     addtotree(right, diff)
     return (left.x + right.x) / 2
@@ -68,13 +67,13 @@ def rattach(left, right, depth):
 def lattach(left, right, depth):
     if depth > 1:
         return lattach(left.left(), right.left(), depth-1)
-    left.thread = left.left()
+    left.thread = right.left()
 
 def addtotree(tree, val):
     tree.x += val
     if len(tree.children):
         for child in tree.children[:2]: addtotree(child, val)
- 
+
 def contour(tree, next): 
     next_node = getattr(tree, next)()
     if not next_node: return [tree.x]
