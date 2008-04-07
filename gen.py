@@ -8,9 +8,9 @@ class Tree:
         else:        self.children = []
     
     def __str__(self): 
-        return "%s - %d children" % (self.node, len(self.children))
+        return "%s" % (self.node)
     def __repr__(self):
-        return "%s - %d children" % (self.node, len(self.children))
+        return "%s" % (self.node)
 
     def __getitem__(self, key):
         if isinstance(key, int) or isinstance(key, slice): 
