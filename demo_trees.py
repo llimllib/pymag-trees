@@ -68,12 +68,12 @@ Tree("root",
 
 #6 Buchheim Failure
 Tree("root", 
-  Tree("l1",
-    Tree("l9"),
-      Tree("l10")),
-  Tree("r1", 
-    Tree("r2"),
-    Tree("r5"))),
+  Tree("l",
+    Tree("ll"),
+      Tree("lr")),
+  Tree("r", 
+    Tree("rl"),
+    Tree("rr"))),
 
 #6 buchheim n-ary tree
 Tree("root",
