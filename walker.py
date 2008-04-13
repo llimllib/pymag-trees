@@ -9,7 +9,8 @@ class DrawTree:
         self.tree = tree
         self.children = [DrawTree(t, self, depth+1) for t in tree]
         #XXX: how else do I determine if a node has a left brother?
-        #     Should this be here when I have to maintain the ancestor node anyway
+        #     Should this be here when I have to maintain the ancestor node
+        #     anyway
         self.parent = parent
         self.thread = None
         self.mod = None
