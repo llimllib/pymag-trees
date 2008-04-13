@@ -3,19 +3,21 @@ from operator import lt, gt
 from sys import stdout
 
 class DrawTree(object):
-    def __init__(self, tree, parent=None, depth=0):
+    def __init__(self, tree, parent=None, depth=0, number=1):
         self.x = -1
         self.y = depth
         self.tree = tree
-        self.children = [DrawTree(c, self, depth+1) for c in tree.children]
-        #XXX: how else do I determine if a node has a left brother?
-        #     Should this be here when I have to maintain the ancestor node anyway
+        self.children = [DrawTree(c, self, depth+1, i+1) 
+                         for i, c
+                         in enumerate(tree.children)]
         self.parent = parent
         self.thread = None
         self.mod = 0
         self.ancestor = self
         self.change = self.shift = 0
         self._lmost_sibling = None
+        #this is the number of the node in its group of siblings 1..n
+        self.number = number
 
     def left(self): 
         return self.thread or len(self.children) and self.children[0]
@@ -55,7 +57,15 @@ def firstwalk(v, distance=2):
             firstwalk(w)
             default_ancestor = apportion(w, default_ancestor)
         execute_shifts(v)
+
+        #keep our xs integral
+        if (v.children[0].x + v.children[-1].x) % 2:
+            v.children[-1].x += 1
+            v.children[-1].mod += 1
         midpoint = (v.children[0].x + v.children[-1].x) / 2
+
+        ell = v.children[0]
+        arr = v.children[-1]
         w = v.lbrother()
         if w:
             v.x = w.x + distance #distance #XXX: what's distance?
@@ -66,7 +76,7 @@ def firstwalk(v, distance=2):
 
 def apportion(v, default_ancestor):
     w = v.lbrother()
-    if w:
+    if w is not None:
         #in buchheim notation:
         #i == inner; o == outer; r == right; l == left; r = +; l = -
         vir = vor = v
@@ -76,14 +86,12 @@ def apportion(v, default_ancestor):
         sil = vil.mod
         sol = vol.mod
         while vil.right() and vir.left():
-            if str(v.tree) == "r1":
-                print "%s %s %s %s" % (vil.tree, vir.tree, vol.tree, vor.tree)
             vil = vil.right()
             vir = vir.left()
             vol = vol.left()
             vor = vor.right()
             vor.ancestor = v
-            shift = (vil.x + sil) - (vir.x + sir) + 1 #distance
+            shift = (vil.x + sil) - (vir.x + sir) + 1 #distance - add padding
             if shift > 0:
                 move_subtree(ancestor(vil, v, default_ancestor), v, shift)
                 sir = sir + shift
@@ -92,19 +100,17 @@ def apportion(v, default_ancestor):
             sir += vir.mod
             sol += vol.mod
             sor += vor.mod
-        right = vil.right()
-        if right and not vor.right():
+        if vil.right() and not vor.right():
             vor.thread = vil.right()
-            vor = vor.mod + sil - sor
-        left = vir.left()
-        if left and not vol.left():
-            vol.thread = left
-            vol.mod = vol.mod + sir - sol
+            vor.mod += sil - sor
+        if vir.left() and not vol.left():
+            vol.thread = vir.left()
+            vol.mod += sir - sol
             default_ancestor = v
     return default_ancestor
 
 def move_subtree(wl, wr, shift):
-    subtrees = len(wr.children) - len(wl.children)
+    subtrees = wr.number - wl.number
     wr.change -= shift / subtrees
     wr.shift += shift
     wl.change += shift / subtrees
@@ -135,5 +141,5 @@ if __name__ == "__main__":
     from demo_trees import trees
     from reingold_thread import p as printtree
 
-    dt = buchheim(trees[5])
+    dt = buchheim(trees[6])
     printtree(dt)
