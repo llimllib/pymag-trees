@@ -55,12 +55,12 @@ class TestBinTree(TreeTest):
         expected = [3, [1, 0, 2], [5, 4, 6]]
         self.assertTree(dt, expected)
 
-class testNaryTree(TreeTest):
+class TestNaryTree(TreeTest):
     def testBuchheim(self):
         #Figure 2 in buchheim
         dt = self.f(trees[7])
-        expected = None #?
-                        #we'll need to figure stuff out before testing this.
+        expected = [1, 0, 1, 2]
+        self.assertTree(dt, expected)
 
 class TestNaive(TestBinTree):
     def setUp(self): 
@@ -79,7 +79,7 @@ class TestAddMod(TestBinTree):
         import reingold_addmod
         self.f = reingold_addmod.reingold_tilford
 
-class TestBuchheim(TestBinTree):
+class TestBuchheim(TestBinTree, TestNaryTree):
     def setUp(self):
         import buchheim
         self.f = buchheim.buchheim
