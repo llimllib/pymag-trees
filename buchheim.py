@@ -4,7 +4,7 @@ from sys import stdout
 
 class DrawTree(object):
     def __init__(self, tree, parent=None, depth=0, number=1):
-        self.x = -1
+        self.x = -1.
         self.y = depth
         self.tree = tree
         self.children = [DrawTree(c, self, depth+1, i+1) 
@@ -40,28 +40,26 @@ class DrawTree(object):
         return self._lmost_sibling
     lmost_sibling = property(get_lmost_sibling)
 
+    def __str__(self): return "%s: x=%s mod=%s" % (self.tree, self.x, self.mod)
+
 def buchheim(tree):
     dt = firstwalk(DrawTree(tree))
     second_walk(dt)
     return dt
 
-def firstwalk(v, distance=2):
+def firstwalk(v, distance=1.):
     if len(v.children) == 0:
         if v.lmost_sibling:
-            v.x = v.lmost_sibling.x + distance
+            v.x = v.lbrother().x + distance
         else:
-            v.x = 0
+            v.x = 0.
     else:
         default_ancestor = v.children[0]
         for w in v.children:
             firstwalk(w)
-            default_ancestor = apportion(w, default_ancestor)
+            default_ancestor = apportion(w, default_ancestor, distance)
         execute_shifts(v)
 
-        #keep our xs integral
-        if (v.children[0].x + v.children[-1].x) % 2:
-            v.children[-1].x += 1
-            v.children[-1].mod += 1
         midpoint = (v.children[0].x + v.children[-1].x) / 2
 
         ell = v.children[0]
@@ -74,7 +72,7 @@ def firstwalk(v, distance=2):
             v.x = midpoint
     return v
 
-def apportion(v, default_ancestor):
+def apportion(v, default_ancestor, distance):
     w = v.lbrother()
     if w is not None:
         #in buchheim notation:
@@ -85,13 +83,14 @@ def apportion(v, default_ancestor):
         sir = sor = v.mod
         sil = vil.mod
         sol = vol.mod
+        #if str(w.tree) == "l1": import pdb; pdb.set_trace()
         while vil.right() and vir.left():
             vil = vil.right()
             vir = vir.left()
             vol = vol.left()
             vor = vor.right()
             vor.ancestor = v
-            shift = (vil.x + sil) - (vir.x + sir) + 1 #distance - add padding
+            shift = (vil.x + sil) - (vir.x + sir) + distance
             if shift > 0:
                 move_subtree(ancestor(vil, v, default_ancestor), v, shift)
                 sir = sir + shift
@@ -135,11 +134,15 @@ def second_walk(v, m=0, depth=0):
     v.x += m
     v.y = depth
     for w in v.children:
-        second_walk(w, m + v.mod, depth+1)
+        second_walk_(w, m + v.mod, depth+1)
+
+def scale(v, factor):
+    v.x *= factor
+    for w in v.children: scale(w, factor)
 
 if __name__ == "__main__":
     from demo_trees import trees
     from reingold_thread import p as printtree
 
-    dt = buchheim(trees[6])
+    dt = buchheim(trees[3], 6)
     printtree(dt)
