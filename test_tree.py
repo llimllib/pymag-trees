@@ -4,33 +4,34 @@ from reingold_thread import reingold_tilford as rtc
 from reingold_thread import p as printtree
 import unittest
 
-def assertTree(self, tree, expected):
-    self.assertEqual(tree.x, expected[0])
-    for i in range(1, len(tree.children)+1):
-        child = tree.children[i-1]
-        exp = expected[i]
-        if isinstance(exp, int): assertTree(child, [exp])
-        else:                    assertTree(child, exp)
+class TreeTest(unittest.TestCase):
+    def assertTree(self, tree, expected):
+        self.assertEqual(tree.x, expected[0])
+        for i in range(1, len(tree.children)+1):
+            child = tree.children[i-1]
+            exp = expected[i]
+            if isinstance(exp, int): self.assertTree(child, [exp])
+            else:                    self.assertTree(child, exp)
 
-class TestBinTree(unittest.TestCase):
+class TestBinTree(TreeTest):
     def testSimple(self):
         dt = self.f(trees[0])
-        assertTree(dt, [1, 0, 2])
+        self.assertTree(dt, [1, 0, 2])
 
     def testDeepLeft(self):
         dt = self.f(trees[1])
         expected = [1, [0, [0, [0, [0]]]], 2]
-        assertTree(dt, expected)
+        self.assertTree(dt, expected)
 
     def testDeepRight(self):
         dt = self.f(trees[2])
         expected = [1, 0, [2, [2, [2, 2]]]]
-        assertTree(dt, expected)
+        self.assertTree(dt, expected)
 
     def testBalanced(self):
         dt = self.f(trees[3])
         expected = [2, [1, [1, 0, 2]], [3, 2, [4, 3, 5]]]
-        assertTree(dt, expected)
+        self.assertTree(dt, expected)
 
     def testUnbalanced(self):
         #this one is a portion of a category tree from work;
@@ -38,7 +39,7 @@ class TestBinTree(unittest.TestCase):
         #be a thread-specific test.
         dt = self.f(trees[4])
         expected = [6, [4, [3, [2, [1, 0, 2], 3], 4], 5], [8, [7, 6, 8], 9]]
-        assertTree(dt, expected)
+        self.assertTree(dt, expected)
 
     def testWSTree(self):
         #this is the tree featured prominently in Wetherell-Shannon. I draw it
@@ -46,19 +47,19 @@ class TestBinTree(unittest.TestCase):
         #single children directly underneath parents
         dt = self.f(trees[5])
         expected = [3, [1, 0, [2, 1, 3]], [5, [5, [5, [5, [4, 3, 5], 6]]]]]
-        assertTree(dt, expected)
+        self.assertTree(dt, expected)
 
     def testBuchMerge(self):
         #the simplest tree I could make fail on buchheim's algo
         dt = self.f(trees[6])
         expected = [3, [1, 0, 2], [5, 4, 6]]
-        assertTree(dt, expected)
+        self.assertTree(dt, expected)
 
-def testNaryTree(unittest.TestCase):
+class testNaryTree(TreeTest):
     def testBuchheim(self):
         #Figure 2 in buchheim
         dt = self.f(trees[7])
-        expected = pass #?
+        expected = None #?
                         #we'll need to figure stuff out before testing this.
 
 class TestNaive(TestBinTree):
