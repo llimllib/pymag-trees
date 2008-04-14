@@ -41,6 +41,7 @@ class DrawTree(object):
     lmost_sibling = property(get_lmost_sibling)
 
     def __str__(self): return "%s: x=%s mod=%s" % (self.tree, self.x, self.mod)
+    def __repr__(self): return self.__str__()
 
 def buchheim(tree):
     dt = firstwalk(DrawTree(tree))
