@@ -28,7 +28,7 @@ class TestBinTree(TreeTest):
         expected = [1, 0, [2, [2, [2, 2]]]]
         self.assertTree(dt, expected)
 
-    def testBalanced(self):
+    def testTightright(self):
         dt = self.f(trees[3])
         expected = [2, [1, [1, 0, 2]], [3, 2, [4, 3, 5]]]
         self.assertTree(dt, expected)
