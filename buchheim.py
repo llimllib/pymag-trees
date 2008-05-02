@@ -45,8 +45,15 @@ class DrawTree(object):
 
 def buchheim(tree):
     dt = firstwalk(DrawTree(tree))
-    second_walk(dt)
+    min = second_walk(dt)
+    if min < 0:
+        third_walk(dt, -min)
     return dt
+
+def third_walk(tree, n):
+    tree.x += n
+    for c in tree.children:
+        third_walk(c, n)
 
 def firstwalk(v, distance=1.):
     if len(v.children) == 0:
@@ -59,6 +66,7 @@ def firstwalk(v, distance=1.):
         for w in v.children:
             firstwalk(w)
             default_ancestor = apportion(w, default_ancestor, distance)
+        print "finished v =", v.tree, "children"
         execute_shifts(v)
 
         midpoint = (v.children[0].x + v.children[-1].x) / 2
@@ -67,7 +75,7 @@ def firstwalk(v, distance=1.):
         arr = v.children[-1]
         w = v.lbrother()
         if w:
-            v.x = w.x + distance #distance #XXX: what's distance?
+            v.x = w.x + distance
             v.mod = v.x - midpoint
         else:
             v.x = midpoint
@@ -84,7 +92,6 @@ def apportion(v, default_ancestor, distance):
         sir = sor = v.mod
         sil = vil.mod
         sol = vol.mod
-        #if str(w.tree) == "l1": import pdb; pdb.set_trace()
         while vil.right() and vir.left():
             vil = vil.right()
             vir = vir.left()
@@ -103,14 +110,17 @@ def apportion(v, default_ancestor, distance):
         if vil.right() and not vor.right():
             vor.thread = vil.right()
             vor.mod += sil - sor
-        if vir.left() and not vol.left():
-            vol.thread = vir.left()
-            vol.mod += sir - sol
+        else:
+            if vir.left() and not vol.left():
+                vol.thread = vir.left()
+                vol.mod += sir - sol
             default_ancestor = v
     return default_ancestor
 
 def move_subtree(wl, wr, shift):
     subtrees = wr.number - wl.number
+    print wl.tree, "is conflicted with", wr.tree, 'moving', subtrees, 'shift', shift
+    #print wl, wr, wr.number, wl.number, shift, subtrees, shift/subtrees
     wr.change -= shift / subtrees
     wr.shift += shift
     wl.change += shift / subtrees
@@ -120,6 +130,7 @@ def move_subtree(wl, wr, shift):
 def execute_shifts(v):
     shift = change = 0
     for w in v.children[::-1]:
+        print "shift:", w, shift, w.change
         w.x += shift
         w.mod += shift
         change += w.change
@@ -131,19 +142,21 @@ def ancestor(vil, v, default_ancestor):
     else:
         return default_ancestor
 
-def second_walk(v, m=0, depth=0):
+def second_walk(v, m=0, depth=0, min=None):
     v.x += m
     v.y = depth
-    for w in v.children:
-        second_walk_(w, m + v.mod, depth+1)
 
-def scale(v, factor):
-    v.x *= factor
-    for w in v.children: scale(w, factor)
+    if min is None or v.x < min:
+        min = v.x
+
+    for w in v.children:
+        min = second_walk(w, m + v.mod, depth+1, min)
+
+    return min
 
 if __name__ == "__main__":
     from demo_trees import trees
     from reingold_thread import p as printtree
 
-    dt = buchheim(trees[3], 6)
+    dt = buchheim(trees[9])
     printtree(dt)
