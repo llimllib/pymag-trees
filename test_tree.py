@@ -50,7 +50,7 @@ class TestBinTree(TreeTest):
         self.assertTree(dt, expected)
 
     def testBuchMerge(self):
-        #the simplest tree I could make fail on buchheim's algo
+        #the simplest tree I could make fail on a buggy buchheim's algo
         dt = self.f(trees[6])
         expected = [3, [1, 0, 2], [5, 4, 6]]
         self.assertTree(dt, expected)
@@ -77,7 +77,7 @@ class TestThread(TestBinTree):
 class TestAddMod(TestBinTree):
     def setUp(self): 
         import reingold_addmod
-        self.f = reingold_addmod.reingold_tilford
+        self.f = reingold_addmod.layout
 
 class TestBuchheim(TestBinTree, TestNaryTree):
     def setUp(self):
@@ -88,6 +88,6 @@ if __name__ == "__main__":
     load = unittest.TestLoader().loadTestsFromTestCase
     suite = load(TestNaive)
     suite.addTests(load(TestThread))
-    #suite.addTests(load(TestAddMod))
-    suite.addTests(load(TestBuchheim))
+    suite.addTests(load(TestAddMod))
+    #suite.addTests(load(TestBuchheim))
     unittest.TextTestRunner(verbosity=2).run(suite)

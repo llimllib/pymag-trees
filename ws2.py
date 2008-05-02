@@ -30,7 +30,6 @@ def setup(tree, depth=0, nexts=None, offset=None):
 
     tree.y = depth
     
-    i=0
     if not len(tree.children):
         place = nexts[depth]
         tree.x = place
@@ -38,17 +37,14 @@ def setup(tree, depth=0, nexts=None, offset=None):
         place = tree.children[0].x - 1
     else:
         s = (tree.children[0].x + tree.children[1].x)
-        print tree.children[0].x , tree.children[1].x, tree.tree.node
-        #i = s % 2
-        #s += i
-        place = s / 2 + i
+        place = s / 2
 
     offset[depth] = max(offset[depth], nexts[depth]-place)
 
     if len(tree.children):
         tree.x = place + offset[depth]
 
-    nexts[depth] += 2 + i
+    nexts[depth] += 2
     tree.offset = offset[depth]
 
 def addmods(tree, modsum=0):
