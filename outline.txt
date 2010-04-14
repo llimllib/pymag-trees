@@ -1,0 +1,36 @@
+Drawing Presentable Trees
+
+* Introduction
+  * Goals
+    * Learn basic techniques for drawing trees
+    * Develop an O(n) method for drawing trees
+    * See some neat things along the way
+    * Develop some constraints for attractive graphs
+  * (TODO: refresher on pre- post- in- order?)
+    * (refresh O(n) == linear time -> O(n**2) == exponential time?
+  * In the beginning, there was Knuth
+    * Principle 1: The edges of the tree do not cross each other
+    * Principle 2: All nodes at the same depth should be drawn at the same y value
+    * Inorder traversal
+    * Drew the tree from the root down?
+  * Wetherell and Shannon
+    * Principle 3: Trees should occupy as little width as possible
+    * A minimum tree
+    * Principle 4: A parent should be centered over its children
+    * Introduce the algorithm without any mods
+    * Introduce mods to shift trees in a second pass to avoid O(n**2)
+  * Reingold
+    * Principle 5: A subtree should be drawn in the same way regardless of where
+                   it occurs in the tree (symmetry by translation)
+    * Developed a binary tree drawing algorithm that was O(n) *and* narrower
+      than WS
+    * Introduce threads to traverse trees in O(n)
+  * Walker's Algorithm
+    * extends Reingold to n-ary trees
+    * Proceeds as Reingold, but simply divides each shift by the number of trees that need
+      to shift and adds it to each immediately, which is transparently O(n**2)
+  * Buchheim
+    * Showed that Walker's Algorithm was not O(n) (ready to read the math to see what it is :)?
+    * Now we're going to combine all of the techniques we've talked about into
+      one O(n) algorithm for generating trees
+    * let's get here and see where we are :)

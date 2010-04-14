@@ -1,0 +1,412 @@
+=t=Drawing Presentable Trees=t=
+
+=b=Bill Mill=b=
+
+=d= Laying out diagrams of trees in an efficient manner is a surprisingly 
+difficult problem. This article presents a summary and implementation of the 
+work that's been done to make it possible. =d=
+
+When I needed to draw some trees for a project I was doing, I assumed that 
+there would be a classic, easy algorithm for drawing neat trees. What I found 
+instead was much more interesting; not only is tree layout an NP-complete 
+problem [1], but there is a long and interesting history behind tree-drawing 
+algorithms. I will use the history of tree drawing algorithms to introduce 
+central concepts one at a time, using each of them to build up to a complete
+//O(n)// algorithm for drawing attractive diagrams of trees.
+
+=h=In the beginning, there was Knuth=h=
+
+A tree is a data structure consisting of nodes linked by edges such that each 
+node except the root has a parent and zero or more children, and there are no 
+cycles; see figure 1 for an example. The tree layout problem asks us to 
+assign x and y coordinates to each node such that the tree can be displayed in 
+an attractive manner and in a reasonable amount of time.
+
+Obviously, what constitutes an attractive tree drawing or a reasonable amount 
+of time is a matter of taste. Throughout this article we'll look at the output 
+of several algorithms, find something that could be improved on in each, 
+develop an aesthetic principle from it, and develop a technique to fix it. We 
+will also start with binary trees (trees with only 2 children), and later 
+generalize to n-ary trees.
+
+The particular type of drawing that we'll be making is one where the root is at 
+the top, its children are below it, and so on. This type of diagram, and thus 
+this entire class of problems, owes largely to Donald Knuth[2], from whom we 
+will draw our first two principles:
+
+**Principle 1:** The edges of the tree should not cross each other.
+
+**Principle 2:** All nodes at the same depth should be drawn on the same 
+horizontal line. This helps make clear the structure of the tree.
+
+=h= The Knuth Algorithm =h=
+
+The Knuth algorithm has the advantage of simplicity and blazing speed, but it 
+only works on binary trees and it can produce some fairly misshapen drawings. 
+It is a simple inorder traversal of a tree, with a global counter which gets 
+used as the x variable, then incremented at each node. The code in listing one  
+demonstrates this technique.
+
+#listing_1
+
+As you can see from figure 2, this algorithm produces a tree that 
+definitely satisfies principle 1, but is not particularly attractive. You can 
+also see that Knuth diagrams will get wide very quickly, since they will not 
+reuse x coordinates even when the tree could be significantly narrower. To
+avoid this waste of space, we'll introduce a third principle:
+
+**Pinrciple 3:** Trees should be drawn as narrow as possible.
+
+=h= A Brief Refresher =h=
+
+Before we go on towards some more advanced algorithms, It's probably a good  
+idea to stop and agree on the terms we'll use in this article. We already 
+talked about inorder tree traversals, and we're also going to talk about 
+//preorder// and //postorder// traversals.. You probably saw these three terms 
+on a test a long time ago, but unless you've been playing with trees lately, 
+they may have gotten a bit hazy.
+
+The traversal types simply determine when we do the processing we need to do on 
+a given node. //Inorder// traversal, as in the Knuth algorithm above, only 
+applies to binary trees, and means that we process the left child, then process 
+the current node, then finally the right child. //Preorder// traversal means we 
+process the current node, then all its children, and //posterder// traversal is 
+simply the reverse.
+
+You've probably seen the concept of Big O notation before. In this article, 
+we're going to play fast and loose with it, using it as a simple tool to 
+distinguish acceptable runtimes from unacceptable ones. If an algorithm already 
+in its main loop frequently loops through all the children of one of its nodes, 
+we're going to call it //O(n**2)//, or 
+//exponential//. Anything else we're going to call //O(n)//, or //linear//. If 
+you want more details, the papers referenced at the end of this article contain 
+a great deal more about the runtime characteristics of these algorithms.
+
+Finally, we're going to make use of a metaphor to family trees when describing 
+the relationships between nodes. A node can have //children// below it, 
+//siblings// to its left or right, and a //parent// above it. 
+
+=h= From the Bottom Up =h=
+
+Charles Wetherell and Alfred Shannon [3] came along in 1979, 8 years after 
+Knuth introduced the tree layout problem, and Introduced a whole raft of 
+innovative techniques. First, they showed how to generate the minimum width 
+tree that satisfies our first three principles. Simply maintain the next 
+available slot on each row, traverse the tree in postorder, assign a node that 
+slot, and increment the slot counter, as in listing 2.
+
+#listing_2
+
+Which, although it satisfies all of our principles, is really ugly. It's about 
+time we introduce another principle that would help clean up both the Knuth 
+tree and the minimum width tree:
+
+**Principle 4:** A parent should be centered over its children.
+
+Up to now, we've been able to get away with very simple algorithms to draw 
+trees because we've not really had to consider local context - instead we've 
+relied on global counters to keep our nodes from overlapping each other. In 
+order to satisfy the principle that a parent should be centered over its 
+children, we'll need to consider each node's local context, and so a few new 
+strategies are necessary.
+
+The first strategy that Wetherell and Shannon introduce is to build trees up 
+from the bottom with a post-order traversal of the tree, instead of going from 
+the top down like listing 2, or through the middle like listing 1. Once you 
+look at the tree this way, centering the parent is an easy operation - simply 
+divide its children's x coordinates in half.
+
+We must remember, though, to stay mindful of the left side of the tree when 
+constructing the right. Figure 4 shows a scenario where the right side of the 
+tree has been pushed out to the right in order to accomodate the left. To 
+accomplish this seperation, Wetherell and Shannon maintain the array of next  
+available spots introduced with listing 2, but only use the next available spot 
+if centering the parent would cause the tree to conflict by overlapping two 
+nodes.
+
+=h= The Mods and the Rockers =h=
+
+Before we start looking at more code, let's take a closer look at the 
+consequences of our bottom up construction of the tree. We'll give each node 
+the next available x coordinate if it's a leaf, and center it above its 
+children if it's a branch. However, if centering the branch will cause it to 
+come into conflict with another part of the tree, we need to move it to the 
+right far enough to avoid the conflict.
+
+When we move a branch to the right, we have to move all of its children, or 
+else we will have lost the centered parent node that we've been working so hard 
+to maintain. It's easy to come up with a naive function to move a branch and 
+its subtrees to the right by some number:
+
+#listing_3
+<code>
+def move_right(branch, n):
+    branch.x += n
+    for c in branch.children:
+        move_right(c, n)
+</code>
+
+Which works, but presents a problem. If we use this function to move a subtree 
+to the right, we'll be doing recursion (to move the tree) inside of recursion 
+(to place the nodes), which means we'll have an ineffecient algorithm which may 
+run in time //O(n**2)//.
+
+To solve this problem, we'll give each node an additional member called *mod*.  
+When we come to a branch that we need to move to the right by *n* spaces, we'll 
+add *n* to its *x* coordinate and to its mod value, and happily continue along 
+with the placement algorithm. Because we're moving from the bottom up, we don't 
+need to worry about the bottom of our trees coming into conflict (we've already 
+shown they're not), and we'll wait until later to move them to the right.
+
+Once the first tree traversal has taken place, we run a second tree traversal 
+to move the branches to the right that need to be moved to the right. Since 
+we'll visit each node once and perform only arithmetic on it, we can be sure 
+that this traversal will be //O(n)// just like the first one is, and together 
+that they will be //O(n)// as well.
+
+The code in listing 4 demonstrates both the centering of parent nodes and the 
+use of *mod* values to improve the efficency of our code.
+
+=h= Trees as Blocks =h=
+
+While it does produce good results in many cases, the code in listing 4 can 
+produce some disfigured trees, such as the one in figure 4. A further 
+difficulty in interpreting the trees produced by the Wetherell-Shannon 
+algorithm is that the same tree structure, when placed at a different point in 
+the tree, may be drawn differently. To avoid this, we'll steal a principle from 
+a paper by Edward Reingold and John Tilford[4]:
+
+**Principle 5:** A subtree should be drawn the same no matter where in the tree 
+it lies
+
+Even though this may widen our drawings a bit, this principle will help to make 
+them convey more information. It will also help to simplify our bottom-up 
+traversal of the tree, since one of its consequences is that once we've figured 
+out the x coordinates of a subtree, we only need to move it left or right as a 
+unit.
+
+Here is a sketch of the algorithm:
+
+- Do a post-order traversal of the tree
+- if the node is a leaf, give it an x coordinate of 0
+- else, place its right subtree as close to the left as possible without 
+  conflict
+    - Use the same mod technique as in the previous algorithm to move the tree 
+      in //O(n)// time
+- place the node halfway between its children
+- Do a second walk of the tree, adding the accumulated mod value to the x 
+  coordinate
+
+This algorithm is simple to the point of brilliance, but as usual we're going 
+to hit a bit of resistance. Let's look at a naive procedure which, given two 
+trees, will determine how far the right tree must be pushed to the right:
+
+#listing_5
+
+In order to understand this code, we first need to define the //contour// of a 
+tree to be the x-coordinates of the outside or inside of a tree. In figure 5, 
+we have two trees which have been overlaid with their x-coordinates. The left 
+contour of the left tree is [1,1,0] and the right contour is [1,1,2]. The same  
+contours for the right tree are [1,0,1] and [1,2,3]. In order to find these 
+contours, the procedure //contour// simply recurses over the whole tree, saving 
+the minimum (for the left contour) or maximum (for the right) value at every 
+level.
+
+In order to join these two trees, we need to find the right contour of the left 
+tree, then the left contour of the right tree, and then find the level at which 
+they have the greatest conflict. If we move the right tree to the right enough 
+to avoid the conflict, the two trees will be as close as they can get without 
+conflicting with one another.
+
+So, if we wanted to join the left tree from figure 5 with the right one, the 
+first thing we'd do would be to calculate the right contour of the left tree, 
+[1,1,2], and the left contour of the right tree, [1,0,1]. Then we'd calculate 
+the difference at every level, giving [0,1,1], take the maximum from that list, 
+1, and return that value plus the amount of space we want to leave between the 
+trees. In this simplified example, we'll just add one, meaning that the 
+algorithm returns the integer 2.
+
+If we look at the diagram and add 2 to every x-coordinate of the right tree, we 
+see that it would become properly positioned to the right of the left tree, and 
+the two trees would be ready to have their parent placed in between them.
+
+=h= New Threads =h=
+
+Using the code in listing 5, we found the correct value for how far we had to 
+push the right tree, but to do so we had to scan every node in both subtrees to 
+get the contours we needed. Since it is very likely an //O(n**2)// operation, 
+Reingold and Tilford introduce a concept confusingly called //threads//, which 
+are not at all like the threads used for parallel processes.
+
+Threads are a method for reducing the amount of time it takes to scan a subtree 
+for its contour by creating links between nodes on the contour if they're not 
+already related. In figure 6, the dotted line represents a thread while a solid 
+line represents a parent-child relationship.
+
+We can also take advantage of the fact that, if the one tree is deeper than the 
+other, we only need to descend as far as the shorter tree. Anything deeper than 
+that will not affect the seperation necessary between the two trees, since 
+there can be no conflicts between them. 
+
+Using threads and only traversing as deeply as we need to, we can get a contour 
+for a tree and set our threads in linear time with the following procedure:
+
+#listing_6
+
+It's easy to see that this procedure only visits two nodes on each level of the 
+subtree being scanned. The paper has a neat proof that this occurs in linear 
+time; I recommend that you go read it if you're interested.
+
+=h= Putting it all Together =h=
+
+The contour procedure given in listing 6 is neat and fast, but it won't work 
+with the mod procedure we discussed earlier, because the actual x value of a 
+node is the node's x value plus the sum of all the modifiers on the path from 
+itself to the root. To handle this case, we'll need to add another couple bits
+of complexity to our contour algorithm.
+
+#listing_7
+
+The first thing we need to do is maintain two additional variables, a sum of 
+the modifiers on the left subtree and a sum of the modifiers on the right 
+subtree. These sums  are necessary to compute the actual position of each node 
+on the contour, so that we can check to see if it conflicts with a node on the 
+opposite side.
+
+#XXX# do we want a graphic and further explanation of this point?
+
+The other thing we need to do is return the current state of the function when
+we exit so that we can set the proper offset on the threaded nodes. With that 
+information in hand, we're ready to look at the function that uses the code in 
+listing 7 to place two trees as closely together as possible:
+
+#listing_8
+
+After we run the contour procedure, we add 1 to the maximum difference between 
+the left and right trees so that they won't conflict with each other, then add 
+another one if the midpoint between them is odd. This lets us keep a handy 
+property for testing - all nodes have integral x coordinates, with no loss of 
+precision.
+
+Then we move the right tree the prescribed amount to the right. Remember here 
+that the reason we both add diff to the x coordinate and save it to the mod 
+value is that the mod value only applies to the nodes below the current node.  
+If the right subtree has more than one node, we add diff to the roffset, since 
+all children of the right node will be moved that far to the right.
+
+If the left side of the tree was deeper than the right, or vice versa, we need 
+to set a thread. We simply check to see if the node pointer for one side 
+progressed farther than the node pointer for the other side, and if it has, set 
+the thread from the outside of the shallower tree to the inside of the deeper 
+one.
+
+In order to properly handle the mod values that we talked about before, we need 
+to set a special mod value on threaded nodes. Since we've already updated our 
+right offset value to reflect the right tree's movement to the right, all we 
+need to do here is set the mod value of the threaded node to the difference 
+between the offset of the deeper tree and itself.
+
+Now that we have code in place to find the contours of trees and to place two 
+trees as close together as possible, we can easily implement the algorithm 
+described above. I present the rest of the code without comment:
+
+#listing_9
+
+=h= Extension to N-ary Trees =h=
+
+Now that we've finally got an algorithm for drawing binary trees which 
+satisfies our principles, looks good in the general case, and runs in linear 
+time, it's natural to think about how to extend it to trees with any amount of 
+children. If you've followed me this far, you're probably thinking that we 
+should just take the wonderful algorithm we've just defined and apply it across 
+all the children of a node.
+
+An extension of the previous algorithm to work on n-ary trees might look 
+something like this:
+
+- Do a post-order traversal of the tree
+- if the node is a leaf, give it an x coordinate of 0
+- otherwise, for each of its children:
+    - place the child as close to its left sibling as possible
+- place the parent node halfway between its leftmost and rightmost children
+
+This algorithm works, and is fast, but suffers from a simple problem. It stuffs 
+all of the subtrees of the node as far to the left as possible. If a node far 
+on the right conflicts with one far on the left, the trees in between are all 
+going to be stuffed to the right, as in figure 7. Let's adopt one final 
+principle for tree drawing to fix this problem:
+
+**Principle 6:** The child nodes of a parent node should be evenly spaced
+
+In order to draw an n-ary tree symmetrically, and quickly, we're going to need 
+all the tricks we've developed so far plus a couple new ones. Thanks to a 
+recent paper by Christoph Buchheim et al [5], we've got all the tools at hand 
+to do so and still be able to draw our trees in linear time.
+
+To modify the algorithm above to meet principle 6, we'll need a method for 
+spacing out the trees in between two larger trees that conflict. The simplest 
+method would be to, every time two trees conflict, divide the available space 
+by the number of trees, and shift each tree so that it's seperated by that 
+amount from its siblings. For example, in figure 7, there is some distance 
+//n// between the large trees on the right and the left, and three trees in 
+between them. If we simply spaced the first tree in the middle //n/3// away 
+from the left tree, the next one //n/3// away from that, and so on, we'd have a 
+tree that satisfied principle 6.
+
+Every time so far that we've looked at a simple algorithm in this article, 
+we've found it inadequte, and this time is no different. If we have to shift 
+all the trees in between every two trees that conflict, we run the risk of 
+introducing an //O(n**2)// operation into our algorithm.
+
+The fix for this problem is similar to the fix for the previous shifting 
+problem we had, for which we introduced //mod//. Instead of shifting each 
+subtree in the middle every time we have a conflict, we'll save the value that 
+we need to shift the trees in the middle, then apply the shifts after we've 
+placed all the children of a node.
+
+In order to figure out the correct value we want to shift the middle nodes, 
+we'll need to be able to find the number of trees in between the two nodes that 
+conflict. When we only had two trees, it was obvious that any conflict that 
+occurred was between the left and the right tree. When there may be any number 
+of trees, finding out which tree is causing the conflict becomes a challenge.
+
+To meet this challenge, we'll introduce a default_ancestor variable and add 
+another member to our tree data structure, which we'll call the //ancestor//.  
+The ancestor node either points to itself or to the root of the tree it belongs 
+to. When we need to find which tree a node belongs to, we'll use the ancestor 
+member if it is set, but fall back on the tree pointed to by default_ancestor.
+
+When we place the first subtree of a node, we simply set default_ancestor to 
+point to that subtree, and assume that any conflict caused by the next tree is 
+with the first one. After we've placed the second subtree, we distinguish two 
+cases. If the second subtree is less deep than the first, we traverse its right 
+contour, setting the ancestor member equal to the root of the second tree.  
+Otherwise, the second tree is larger than the first, which means that any 
+conflicts with the next tree to be placed with be with the second tree, and so 
+we simply set default_ancestor to point to it.
+
+So, without further ado, a python implementation of the O(n) algorithm for 
+laying out attractive trees as presented by Buchheim:
+
+#listing_10
+
+=h= Conclusion =h=
+
+I've glossed over a few things in this article, simply because I felt it was 
+more important to try and present a logical progression to the final algorithm 
+I presented than it was to overload the article with pure code. If you want 
+more details, or to see the tree data structures that I've used in the various 
+code listings, you can go to http://github.com/llimllib/pymag-trees/ to 
+download the source code for each algorithm, some basic tests, and the code 
+used to generate the figures for this article.
+
+footnotes:
+[1] www.emis.de/journals/JGAA/accepted/2004/MarriottStuckey2004.8.3.pdf
+[2] D. E. Knuth, Optimum binary search trees, Acta Informatica 1 (1971)
+[3] C. Wetherell, A. Shannon, Tidy Drawings of Trees, IEEE Transactions on 
+Software Engineering. Volume 5, Issue 5
+[4] E. M. Reingold, J. S Tilford, Tidier Drawings of Trees, IEEE Transactions 
+on Software Engineering. Volume 7, Issue 2
+[5] C. Buchheim, M. J Unger, and S. Leipert. Improving Walker's algorithm to 
+run in linear time. In Proc. Graph Drawing (GD), 2002.  
+http://citeseer.ist.psu.edu/buchheim02improving.html

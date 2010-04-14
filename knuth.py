@@ -1,17 +1,9 @@
 class DrawTree(object):
-    def __init__(self, tree, depth=-1):
+    def __init__(self, tree, depth=0):
         self.x = -1
         self.y = depth
         self.tree = tree
-        self.children = [DrawTree(t) for t in tree]
-        self.thread = None
-        self.offset = 0
-
-    def left(self): 
-        return self.thread or len(self.children) and self.children[0]
-
-    def right(self):
-        return self.thread or len(self.children) and self.children[-1]
+        self.children = [DrawTree(t, depth+1) for t in tree]
 
 def layout(tree):
     dt = DrawTree(tree)

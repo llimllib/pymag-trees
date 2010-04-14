@@ -1,0 +1,3 @@
+Bill Mill is a hacker living in Baltimore. He currently works for a startup
+making network visualization software, and plays lots of Ultimate in his spare
+time. He occasionally updates his blog at [[http://billmill.org]].

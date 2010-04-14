@@ -1,19 +1,7 @@
-from collections import defaultdict
-
-class DrawTree(object):
-    def __init__(self, tree, depth=-1):
-        self.x = -1
-        self.y = depth
-        self.tree = tree
-        self.children = [DrawTree(t) for t in tree]
-        self.thread = None
-        self.offset = 0
-
 def layout(tree):
-    dt = DrawTree(tree)
-    setup(dt)
-    addmods(dt)
-    return dt
+    setup(tree)
+    addmods(tree)
+    return tree
 
 def setup(tree, depth=0, nexts=None, offset=None):
     if nexts is None:  nexts  = defaultdict(lambda: 0)
@@ -31,7 +19,6 @@ def setup(tree, depth=0, nexts=None, offset=None):
         place = tree.children[0].x - 1
     else:
         s = (tree.children[0].x + tree.children[1].x)
-        print tree.children[0].x, tree.children[1].x, tree.tree
         place = s / 2
 
     offset[depth] = max(offset[depth], nexts[depth]-place)
