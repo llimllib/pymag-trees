@@ -152,12 +152,9 @@ def addmods(tree, modsum=0):
 <p class="ceresIndent">Here is a sketch of the algorithm implemented in Listing 6:</p>
 <pre>
 &bull; Do a post-order traversal of the tree
-&bull; if the node is a leaf,
-  give it an x coordinate of 0
-&bull; else, place its right subtree as close to the
-  left as possible without conflict
-    &bull; Use the same mod technique as in the previous
-      algorithm to move the tree in O(n) time
+&bull; if the node is a leaf, give it an x coordinate of 0
+&bull; else, place its right subtree as close to the left as possible without conflict
+    &bull; Use the same mod technique as in the previous algorithm to move the tree in O(n) time
 &bull; place the node halfway between its children
 &bull; Do a second walk of the tree, adding the
   accumulated mod value to the x coordinate
