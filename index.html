@@ -146,42 +146,172 @@ def addmods(tree, modsum=0):
     for t in tree.children:
         addmods(t, modsum)
 </pre>
-<p class="ceresIndent"><a style="headerAnchor" name="heading6"><h2 class="articleHeading">Trees as Blocks</h2></a>While it does produce good results in many cases, Listing 5 can produce some disfigured trees, such as the one in Figure 5. A further difficulty in interpreting the trees produced by the Wetherell-Shannon algorithm is that the same tree structure, when placed at a different point in the tree, may be drawn differently. To avoid this, we&#039;ll steal a principle from a paper by Edward Reingold and John Tilford<sup><a href="#foot4">4</a></sup>:</p>
+<p class="ceresIndent"><a style="headerAnchor" name="heading6"><h2 class="articleHeading">Trees as Blocks</h2></a>While it does produce good results in many cases, Listing 5 can produce some disfigured trees, such as the one in Figure 5 (<em>ed: sadly, lost to the sands of time</em>). A further difficulty in interpreting the trees produced by the Wetherell-Shannon algorithm is that the same tree structure, when placed at a different point in the tree, may be drawn differently. To avoid this, we&#039;ll steal a principle from a paper by Edward Reingold and John Tilford<sup><a href="#foot4">4</a></sup>:</p>
 <p class="ceresIndent"><strong>Principle 5</strong>: <i> A subtree should be drawn the same no matter where in the tree it lies.</i></p>
 <p class="ceresIndent">Even though this may widen our drawings a bit, this principle will help to make them convey more information. It will also help to simplify our bottom-up traversal of the tree, since one of its consequences is that once we&#039;ve figured out the x coordinates of a subtree, we only need to move it left or right as a unit.</p>
 <p class="ceresIndent">Here is a sketch of the algorithm implemented in Listing 6:</p>
-<p class="ceresIndent">
-<div class="ceresCodePreamble">
-			Listing 2 &ndash; <a href="javascript:ceresToggleLineNumbers(2)">Toggle plain text mode</a>
-			&ndash; <a href="javascript:ceresSelectAll (2)">Select listing</a>
+<pre>
+&bull; Do a post-order traversal of the tree
+&bull; if the node is a leaf,
+  give it an x coordinate of 0
+&bull; else, place its right subtree as close to the
+  left as possible without conflict
+    &bull; Use the same mod technique as in the previous
+      algorithm to move the tree in O(n) time
+&bull; place the node halfway between its children
+&bull; Do a second walk of the tree, adding the
+  accumulated mod value to the x coordinate
+</pre>
+<p class="ceresIndent">This algorithm is simple to the point of brilliance, but to execute it we&#039;ll need to introduce a bit of complexity.</p>
+<p class="ceresIndent"><a style="headerAnchor" name="heading7"><h2 class="articleHeading">Contours</h2>
+<div id="rightim"> 
+    <img src="images/figure6.png">
+    <br><em>figure 6</em>
 </div>
-<div class="ceresCode" id="ceresLst2"><div class="ceresCodeElement"><ol><li class="li1"><div class="de1">- Do a post-order traversal of the tree</div></li>
-<li class="li1"><div class="de1">- if the node is a leaf, </div></li>
-<li class="li1"><div class="de1">&nbsp; give it an x coordinate of 0</div></li>
-<li class="li1"><div class="de1">- else, place its right subtree as close to the </div></li>
-<li class="li1"><div class="de1">&nbsp; left as possible without conflict</div></li>
-<li class="li1"><div class="de1">&nbsp; &nbsp; - Use the same mod technique as in the previous</div></li>
-<li class="li1"><div class="de1">&nbsp; &nbsp; &nbsp; algorithm to move the tree in O(n) time</div></li>
-<li class="li1"><div class="de1">- place the node halfway between its children</div></li>
-<li class="li1"><div class="de1">- Do a second walk of the tree, adding the </div></li>
-<li class="li1"><div class="de1">&nbsp; accumulated mod value to the x coordinate</div></li></ol></div></div>This algorithm is simple to the point of brilliance, but to execute it we&#039;ll need to introduce a bit of complexity.</p>
-<p class="ceresIndent"><a style="headerAnchor" name="heading7"><h2 class="articleHeading">Contours</h2></a>The <i>contour</i> of a tree is a list of the maximum or minimum coordinates of the a side of the tree. In Figure 6, there is a left tree and a right tree, with the x-coordinate of each node overlaid. If we trace down the left side of the left tree, taking the minimum x coordinate of each level, we get [1,1,0], which we call the <i>left contour</i> of the tree. If we trace down the right side, taking the rightmost x-coordinate from each level, we get [1,1,2], which is the <i>right contour</i> of the tree.</p>
+</a>The <i>contour</i> of a tree is a list of the maximum or minimum coordinates of the a side of the tree. In Figure 6, there is a left tree and a right tree, with the x-coordinate of each node overlaid. If we trace down the left side of the left tree, taking the minimum x coordinate of each level, we get [1,1,0], which we call the <i>left contour</i> of the tree. If we trace down the right side, taking the rightmost x-coordinate from each level, we get [1,1,2], which is the <i>right contour</i> of the tree.</p>
 <p class="ceresIndent">To find the left contour of the right tree, we again take the x-coordinate of the leftmost node on each level, giving us [1,0,1]. This time, the contour has an interesting property that not all nodes are connected in a parent-child relationship; the 0 on the second level is not the parent of the 1 on the third.</p>
 <p class="ceresIndent">If we were to join these two trees according to Listing 6, we could find the right contour of the left tree, and the left contour of the right tree. Then we could easily find the smallest amount that we needed to push the right tree to the right so that it didn&#039;t overlap the left tree. A simple method for doing so is given in Listing 7.</p>
+<pre>
+from operator import lt, gt
+
+def push_right(left, right):
+    wl = contour(left, lt)
+    wr = contour(right, gt)
+    return max(x-y for x,y in zip(wl, wr)) + 1
+    
+def contour(tree, comp, level=0, cont=None):
+    if not cont: 
+        cont = [tree.x]
+    elif len(cont) < level+1:
+        cont.append(tree.x)
+    elif comp(cont[level], tree.x):
+        cont[level] = tree.x
+
+    for child in tree.children:
+        contour(child, comp, level+1, cont)
+
+    return cont
+</pre>
 <p class="ceresIndent">If we run the procedure <code>push_right()</code> from Listing 7 on the tree from Figure 6, we will get [1,1,2] as the right contour of the left tree and [1,0,1] as the left contour of the right tree. We then compare these lists to find the maximum space between them, and add one space for padding. In the case of Figure 6, pushing the right tree to the right by 2 spaces will prevent it from overlapping the left tree.</p>
 <p class="ceresIndent"><a style="headerAnchor" name="heading8"><h2 class="articleHeading">New Threads</h2></a>Using the code in Listing 7, we found the correct value for how far we had to push the right tree, but to do so we had to scan every node in both subtrees to get the contours we needed. Since it is very likely an O(n^2) operation, Reingold and Tilford introduce a concept confusingly called <i>threads</i>, which are not at all like the threads used for parallel execution.</p>
+<div id="rightim"> 
+    <img src="images/figure7.png">
+    <br><em>figure 7</em>
+</div>
 <p class="ceresIndent">Threads are a method for reducing the amount of time it takes to scan a subtree for its contour by creating links between nodes on the contour if one is not already the child of the other. In Figure 7, the dotted line represents a thread while a solid line represents a parent-child relationship.</p>
 <p class="ceresIndent">We can also take advantage of the fact that, if the one tree is deeper than the other, we only need to descend as far as the shorter tree. Anything deeper than that will not affect the separation necessary between the two trees, since there can be no conflicts between them.</p>
 <p class="ceresIndent">Using threads and only traversing as deeply as we need to, we can get a contour for a tree and set our threads in linear time with the procedure in Listing 8.</p>
+<pre>
+def nextright(tree):
+    if tree.thread:   return tree.thread
+    if tree.children: return tree.children[-1]
+    else:             return None
+
+def nextleft(tree):
+    if tree.thread:   return tree.thread
+    if tree.children: return tree.children[0]
+    else:             return None
+
+def contour(left, right, max_offset=0, left_outer=None, right_outer=None):
+    if not left_outer:
+        left_outer = left
+    if not right_outer:
+        right_outer = right
+
+    if left.x - right.x > max_offset:
+        max_offset = left.x - right.x
+
+    lo = nextleft(left)
+    li = nextright(left)
+    ri = nextleft(right)
+    ro = nextright(right)
+
+    if li and ri:
+        return contour(li, ri, max_offset, lo, ro)
+
+    return max_offset
+</pre>
 <p class="ceresIndent">It&#039;s easy to see that this procedure only visits two nodes on each level of the subtree being scanned. The paper has a neat proof that this occurs in linear time; I recommend that you go read it if you&#039;re interested.</p>
 <p class="ceresIndent"><a style="headerAnchor" name="heading9"><h2 class="articleHeading">Putting it all Together</h2></a>The contour procedure given in Listing 8 is neat and fast, but it won&#039;t work with the mod technique we discussed earlier, because the actual x value of a node is the node&#039;s x value <i>plus</i> the sum of all the modifiers on the path from itself to the root. To handle this case, we&#039;ll need to add another couple bits of complexity to our contour algorithm.</p>
 <p class="ceresIndent">The first thing we need to do is maintain two additional variables, a sum of the modifiers on the left subtree and a sum of the modifiers on the right subtree. These sums are necessary to compute the actual position of each node on the contour, so that we can check to see if it conflicts with a node on the opposite side. See Listing 9.</p>
-<p class="ceresIndent">The other thing we need to do is return the current state of the function when we exit so that we can set the proper offset on the threaded nodes. With that information in hand, we&#039;re ready to look at the function that uses the code in Listing 8 to place two trees as closely together as possible. See Listing 10.</p>
+<pre>
+def contour(left, right, max_offset=None, loffset=0, roffset=0, left_outer=None, right_outer=None):
+    delta = left.x + loffset - (right.x + roffset)
+    if not max_offset or delta > max_offset:
+        max_offset = delta
+
+    if not left_outer:
+        left_outer = left
+    if not right_outer:
+        right_outer = right
+
+    lo = nextleft(left_outer)
+    li = nextright(left)
+    ri = nextleft(right)
+    ro = nextright(right_outer)
+
+    if li and ri:
+        loffset += left.offset
+        roffset += right.offset
+        return contour(li, ri, max_offset,
+                       loffset, roffset, lo, ro)
+
+    return (li, ri, max_offset, loffset, roffset, left_outer, right_outer)
+</pre>
+<p class="ceresIndent">The other thing we need to do is return the current state of the function when we exit so that we can set the proper offset on the threaded nodes. With that information in hand, we&#039;re ready to look at the function that uses the code in Listing 8 to place two trees as closely together as possible:</p>
+<pre>
+def fix_subtrees(left, right):
+    li, ri, diff, loffset, roffset, lo, ro \
+        = contour(left, right)
+    diff += 1
+    diff += (right.x + diff + left.x) % 2
+
+    right.mod = diff
+    right.x += diff
+
+    if right.children:
+        roffset += diff
+
+    if ri and not li:
+        lo.thread = ri
+        lo.mod = roffset - loffset
+    elif li and not ri:
+        ro.thread = li
+        ro.mod = loffset - roffset
+
+    return (left.x + right.x) / 2
+</pre>
 <p class="ceresIndent">After we run the contour procedure, we add 1 to the maximum difference between the left and right trees so that they won&#039;t conflict with each other, then add another one if the midpoint between them is odd. This lets us keep a handy property for testing - all nodes have integral x coordinates, with no loss of precision.</p>
 <p class="ceresIndent">Then we move the right tree the prescribed amount to the right. Remember here that the reason we both add diff to the x coordinate and save it to the mod value is that the mod value only applies to the nodes below the current node. If the right subtree has more than one node, we add diff to the roffset, since all children of the right node will be moved that far to the right.</p>
 <p class="ceresIndent">If the left side of the tree was deeper than the right, or vice versa, we need to set a thread. We simply check to see if the node pointer for one side progressed farther than the node pointer for the other side, and if it has, set the thread from the outside of the shallower tree to the inside of the deeper one.</p>
 <p class="ceresIndent">In order to properly handle the mod values that we talked about before, we need to set a special mod value on threaded nodes. Since we&#039;ve already updated our right offset value to reflect the right tree&#039;s movement to the right, all we need to do here is set the mod value of the threaded node to the difference between the offset of the deeper tree and itself.</p>
-<p class="ceresIndent">Now that we have code in place to find the contours of trees and to place two trees as close together as possible, we can easily implement the algorithm described above. I present the rest of the code without comment in Listing 11.</p>
+<p class="ceresIndent">Now that we have code in place to find the contours of trees and to place two trees as close together as possible, we can easily implement the algorithm described above. I present the rest of the code without comment:</p>
+<pre>
+def layout(tree):
+    return addmods(setup(dt))
+
+def addmods(tree, mod=0):
+    tree.x += mod
+    for c in tree.children:
+        addmods(c, mod+tree.mod)
+    return tree
+
+def setup(tree, depth=0):
+    if len(tree.children) == 0:
+        tree.x = 0
+        tree.y = depth
+        return tree
+
+    if len(tree.children) == 1:
+        tree.x = setup(tree.children[0], depth+1).x
+        return tree
+
+    left = setup(tree.children[0], depth+1)
+    right = setup(tree.children[1], depth+1)
+
+    tree.x = fix_subtrees(left, right)
+    return tree
+</pre>
 <p class="ceresIndent"><a style="headerAnchor" name="heading10"><h2 class="articleHeading">Extension to N-ary Trees</h2></a>Now that we&#039;ve finally got an algorithm for drawing binary trees which satisfies our principles, looks good in the general case, and runs in linear time, it&#039;s natural to think about how to extend it to trees with any amount of children. If you&#039;ve followed me this far, you&#039;re probably thinking that we should just take the wonderful algorithm we&#039;ve just defined and apply it across all the children of a node.</p>
 <p class="ceresIndent">An extension of the previous algorithm to work on n-ary trees might look something like this:</p>
 <p class="ceresIndent"><ul class="ceresUl"><li class="ceresLi">Do a post-order traversal of the tree</li><li class="ceresLi">if the node is a leaf, give it an x coordinate of 0</li><li class="ceresLi">otherwise, for each of its children, place the child as close to its left sibling as possible</li><li class="ceresLi">place the parent node halfway between its leftmost and rightmost children</li></ul>This algorithm works, and is fast, but suffers from a simple problem. It stuffs all of the subtrees of the node as far to the left as possible. If a node far on the right conflicts with one far on the left, the trees in between are all going to be stuffed to the right, as in Figure 7. Let&#039;s adopt one final principle for tree drawing to fix this problem:</p>
@@ -194,6 +324,136 @@ def addmods(tree, modsum=0):
 <p class="ceresIndent">To meet this challenge, we&#039;ll introduce a default_ancestor variable and add another member to our tree data structure, which we&#039;ll call the <code>ancestor</code>. The ancestor node either points to itself or to the root of the tree it belongs to. When we need to find which tree a node belongs to, we&#039;ll use the ancestor member if it is set, but fall back on the tree pointed to by <code>default_ancestor</code>.</p>
 <p class="ceresIndent">When we place the first subtree of a node, we simply set default_ancestor to point to that subtree, and assume that any conflict caused by the next tree is with the first one. After we&#039;ve placed the second subtree, we distinguish two cases. If the second subtree is less deep than the first, we traverse its right contour, setting the ancestor member equal to the root of the second tree. Otherwise, the second tree is larger than the first, which means that any conflicts with the next tree to be placed with be with the second tree, and so we simply set default_ancestor to point to it.</p>
 <p class="ceresIndent">So, without further ado, a python implementation of the O(n) algorithm for laying out attractive trees as presented by Buchheim is in Listing 12.</p>
+<pre>
+class DrawTree(object):
+    def __init__(self, tree, parent=None, depth=0, number=1):
+        self.x = -1.
+        self.y = depth
+        self.tree = tree
+        self.children = [DrawTree(c, self, depth+1, i+1) 
+                         for i, c
+                         in enumerate(tree.children)]
+        self.parent = parent
+        self.thread = None
+        self.offset = 0
+        self.ancestor = self
+        self.change = self.shift = 0
+        self._lmost_sibling = None
+        #this is the number of the node in its group of siblings 1..n
+        self.number = number
+
+    def left_brother(self):
+        n = None
+        if self.parent:
+            for node in self.parent.children:
+                if node == self: return n
+                else:            n = node
+        return n
+
+    def get_lmost_sibling(self):
+        if not self._lmost_sibling and self.parent and self != \
+        self.parent.children[0]:
+            self._lmost_sibling = self.parent.children[0]
+        return self._lmost_sibling
+    leftmost_sibling = property(get_lmost_sibling)
+
+def buchheim(tree):
+    dt = firstwalk(tree)
+    second_walk(dt)
+    return dt
+
+def firstwalk(v, distance=1.):
+    if len(v.children) == 0:
+        if v.leftmost_sibling:
+            v.x = v.left_brother().x + distance
+        else:
+            v.x = 0.
+    else:
+        default_ancestor = v.children[0]
+        for w in v.children:
+            firstwalk(w)
+            default_ancestor = apportion(w, default_ancestor,
+                                         distance)
+        execute_shifts(v)
+
+        midpoint = (v.children[0].x + v.children[-1].x) / 2
+
+        ell = v.children[0]
+        arr = v.children[-1]
+        w = v.left_brother()
+        if w:
+            v.x = w.x + distance
+            v.mod = v.x - midpoint
+        else:
+            v.x = midpoint
+    return v
+
+def apportion(v, default_ancestor, distance):
+    w = v.left_brother()
+    if w is not None:
+        #in buchheim notation:
+        #i == inner; o == outer; r == right; l == left;
+        vir = vor = v
+        vil = w
+        vol = v.leftmost_sibling
+        sir = sor = v.mod
+        sil = vil.mod
+        sol = vol.mod
+        while vil.right() and vir.left():
+            vil = vil.right()
+            vir = vir.left()
+            vol = vol.left()
+            vor = vor.right()
+            vor.ancestor = v
+            shift = (vil.x + sil) - (vir.x + sir) + distance
+            if shift > 0:
+                a = ancestor(vil, v, default_ancestor)
+                move_subtree(a, v, shift)
+                sir = sir + shift
+                sor = sor + shift
+            sil += vil.mod
+            sir += vir.mod
+            sol += vol.mod
+            sor += vor.mod
+        if vil.right() and not vor.right():
+            vor.thread = vil.right()
+            vor.mod += sil - sor
+        else:
+            if vir.left() and not vol.left():
+                vol.thread = vir.left()
+                vol.mod += sir - sol
+            default_ancestor = v
+    return default_ancestor
+
+def move_subtree(wl, wr, shift):
+    subtrees = wr.number - wl.number
+    wr.change -= shift / subtrees
+    wr.shift += shift
+    wl.change += shift / subtrees
+    wr.x += shift
+    wr.mod += shift
+
+def execute_shifts(v):
+    shift = change = 0
+    for w in v.children[::-1]:
+        w.x += shift
+        w.mod += shift
+        change += w.change
+        shift += w.shift + change
+
+def ancestor(vil, v, default_ancestor):
+    if vil.ancestor in v.children:
+        return vil.ancestor
+    else:
+        return default_ancestor
+
+def second_walk(v, m=0, depth=0):
+    v.x += m
+    v.y = depth
+
+    for w in v.children:
+        second_walk(w, m + v.mod, depth+1, min)
+</pre>
 <p class="ceresIndent"><a style="headerAnchor" name="heading11"><h2 class="articleHeading">Conclusion</h2></a>I&#039;ve glossed over a few things in this article, simply because I felt it was more important to try and present a logical progression to the final algorithm I presented than it was to overload the article with pure code. If you want more details, or to see the tree data structures that I&#039;ve used in the various code listings, you can go to <a class="ceresLink" href="http://github.com/llimllib/pymag-trees/">http://github.com/llimllib/pymag-trees/</a> to download the source code for each algorithm, some basic tests, and the code used to generate the figures for this article.</p>
 <p class="ceresIndent"><a style="headerAnchor" name="heading12">
 <h2 class="articleHeading">Footnotes</h2></a>
