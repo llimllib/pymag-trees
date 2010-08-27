@@ -1,10 +1,4 @@
-def contour(left,
-            right,
-            max_offset=None,
-            loffset=0,
-            roffset=0,
-            left_outer=None, 
-            right_outer=None):
+def contour(left, right, max_offset=None, loffset=0, roffset=0, left_outer=None, right_outer=None):
     delta = left.x + loffset - (right.x + roffset)
     if not max_offset or delta > max_offset:
         max_offset = delta
@@ -25,6 +19,4 @@ def contour(left,
         return contour(li, ri, max_offset,
                        loffset, roffset, lo, ro)
 
-    return (li, ri, max_offset,
-            loffset, roffset, left_outer, right_outer
-            )
+    return (li, ri, max_offset, loffset, roffset, left_outer, right_outer)
