@@ -25,7 +25,7 @@ def drawconn(root, depth, offset=0):
              child.x * rw + (r/2) + offset, (depth+1) * rh + (r/2))
         drawconn(child, depth+1, offset)
         
-size(1000, 500)
+size(180, 130)
 translate(2, 2)
 stroke(0)
 drawconn(t2, 0)

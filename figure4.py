@@ -22,7 +22,7 @@ def drawconn(root, depth):
              child.x * rw + (r/2), (depth+1) * rh + (r/2))
         drawconn(child, depth+1)
         
-size(1000, 500)
+size(310, 180)
 translate(2, 2)
 stroke(0)
 drawconn(t, 0)

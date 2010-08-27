@@ -51,7 +51,7 @@ def drawthreads(root, depth):
                        c.x * rw + (r/2), (depth+2) * rh + (r/2))
         drawthreads(child, depth+1)
 
-size(1000, 500)
+size(130, 180)
 translate(2, 2)
 stroke(0)
 drawconn(t, 0)
