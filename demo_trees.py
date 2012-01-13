@@ -82,9 +82,7 @@ Tree("root",
   Tree("r")),
 
 #8 buchheim n-ary tree
-#we see with this tree that spacing is not perfect; the middle subtrees tend
-#slightly towards the right. However, it fulfuills all the criteria set out
-#in the paper.
+#this works perfectly.
 Tree("root",
   Tree("bigleft",
     Tree("l1"),
@@ -97,6 +95,7 @@ Tree("root",
   Tree("m1"),
   Tree("m2"),
   Tree("m3", Tree("m31")),
+  Tree("m4"),
   Tree("bigright",
     Tree("brr",
       Tree("br1"),
