@@ -12,13 +12,6 @@ rh = r*1.5
 rw = r*1.5
 stroke(0)
 
-def jimmy(root):
-    if root.tree.__str__() == "m1": root.x -= .83
-    if root.tree.__str__() == "m2": root.x -= 1.67
-    if root.tree.__str__() in ("m3", "m31"): root.x -= 1.5
-    for child in root.children:
-        jimmy(child)
-
 def drawt(root, depth):
     oval(root.x * rw, depth * rh, r, r)
     for child in root.children:
@@ -60,7 +53,6 @@ def drawthreads(root, depth):
 size(1000, 500)
 translate(2, 2)
 stroke(0)
-jimmy(t)
 drawconn(t, 0)
 drawthreads(t, 0)
 fill(1,1,1)
