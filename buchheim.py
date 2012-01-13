@@ -159,4 +159,5 @@ if __name__ == "__main__":
     from reingold_thread import p as printtree
 
     dt = buchheim(trees[9])
-    printtree(dt)
+    # busted; test using nodebox, not the console.
+    #printtree(dt)
