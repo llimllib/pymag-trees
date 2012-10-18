@@ -444,7 +444,7 @@ def execute_shifts(v):
         shift += w.shift + change
 
 def ancestor(vil, v, default_ancestor):
-    if vil.ancestor in v.children:
+    if vil.ancestor in v.parent.children:
         return vil.ancestor
     else:
         return default_ancestor
