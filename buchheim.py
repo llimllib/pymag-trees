@@ -157,10 +157,27 @@ def second_walk(v, m=0, depth=0, min=None):
 
     return min
 
-if __name__ == "__main__":
-    from demo_trees import trees
-    from reingold_thread import p as printtree
+r = 30
+rh = r*1.5
+rw = r*1.5
+stroke(0)
 
-    dt = buchheim(trees[9])
-    # busted; test using nodebox, not the console.
-    #printtree(dt)
+def drawt(root, depth):
+    global r
+    oval(root.x * rw, depth * rh, r, r)
+    print root.x
+    for child in root.children:
+        drawt(child, depth+1)
+
+def drawconn(root, depth):
+    for child in root.children:
+        line(root.x * rw + (r/2), depth * rh + (r/2),
+             child.x * rw + (r/2), (depth+1) * rh + (r/2))
+        drawconn(child, depth+1)
+
+size(1000, 500)
+translate(2, 2)
+stroke(0)
+drawconn(dt, 0)
+fill(1,1,1)
+drawt(dt, 0)
