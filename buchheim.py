@@ -137,14 +137,10 @@ def execute_shifts(v):
         shift += w.shift + change
 
 def ancestor(vil, v, default_ancestor):
-    #A correspondant told me that this should be checking siblings, not children
-    #according to the original paper, but the algorithm seems to work fine for me.
-    #YMMV.
-
     #the relevant text is at the bottom of page 7 of
     #"Improving Walker's Algorithm to Run in Linear Time" by Buchheim et al, (2002)
     #http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.16.8757&rep=rep1&type=pdf
-    if vil.ancestor in v.children:
+    if vil.ancestor in v.parent.children:
         return vil.ancestor
     else:
         return default_ancestor
