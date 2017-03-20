@@ -252,8 +252,8 @@ def contour(left, right, max_offset=None, loffset=0, roffset=0, left_outer=None,
     ro = nextright(right_outer)
 
     if li and ri:
-        loffset += left.offset
-        roffset += right.offset
+        loffset += left.mod
+        roffset += right.mod
         return contour(li, ri, max_offset,
                        loffset, roffset, lo, ro)
 
