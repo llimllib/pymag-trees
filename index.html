@@ -365,7 +365,9 @@ class DrawTree(object):
 
 def buchheim(tree):
     dt = firstwalk(tree)
-    second_walk(dt)
+    min = second_walk(dt)
+    if min < 0:
+        third_walk(dt, -min)
     return dt
 
 def firstwalk(v, distance=1.):
@@ -453,12 +455,22 @@ def ancestor(vil, v, default_ancestor):
     else:
         return default_ancestor
 
-def second_walk(v, m=0, depth=0):
+def second_walk(v, m=0, depth=0, min=None):
     v.x += m
     v.y = depth
 
+    if min is None or v.x < min:
+        min = v.x
+
     for w in v.children:
-        second_walk(w, m + v.mod, depth+1, min)
+        min = second_walk(w, m + v.mod, depth+1, min)
+
+    return min
+
+def third_walk(tree, n):
+    tree.x += n
+    for c in tree.children:
+        third_walk(c, n)
 </pre>
 <p class="ceresIndent"><a style="headerAnchor" name="heading11"><h2 class="articleHeading">Conclusion</h2></a>I&#039;ve glossed over a few things in this article, simply because I felt it was more important to try and present a logical progression to the final algorithm I presented than it was to overload the article with pure code. If you want more details, or to see the tree data structures that I&#039;ve used in the various code listings, you can go to <a class="ceresLink" href="http://github.com/llimllib/pymag-trees/">http://github.com/llimllib/pymag-trees/</a> to download the source code for each algorithm, some basic tests, and the code used to generate the figures for this article.</p>
 <p class="ceresIndent"><a style="headerAnchor" name="heading12">
