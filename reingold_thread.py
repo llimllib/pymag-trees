@@ -15,6 +15,7 @@ class DrawTree:
     def right(self):
         return self.thread or len(self.children) and self.children[-1]
 
+
 # traverse to the bottom of the tree, and place the leaves at an arbitrary
 #   x coordinate
 # if the node is a parent, draw its subtrees, then shift the right one as close
@@ -40,12 +41,13 @@ def reingold_tilford(tree, depth=0):
     dt.x = fix_subtrees(left, right)
     return dt
 
+
 # place the right subtree as close to the left subtree as possible
 
 
 def fix_subtrees(left, right):
-    wl = contour(left, 'right')
-    wr = contour(right, 'left')
+    wl = contour(left, "right")
+    wr = contour(right, "left")
     if len(wl) != len(wr):
         fix_threads(left, right, len(wl), len(wr))
 
@@ -61,6 +63,7 @@ def fix_threads(left, right, ldepth, rdepth):
         rattach(left, right, rdepth)
     else:
         lattach(left, right, ldepth)
+
 
 # when the left tree is deeper than the right tree, descend rdepth levels
 # down the right side of both trees and attach the last node on the right
@@ -93,6 +96,7 @@ def contour(tree, next):
     else:
         return [tree.x] + contour(next_node, next)
 
+
 # given an array of nodes, print them out reasonably on one line
 
 
@@ -117,7 +121,8 @@ def p(tree):
             break
         level = newlevel
 
-#root = gentree("/Users/llimllib/Movies")
+
+# root = gentree("/Users/llimllib/Movies")
 # root.children.reverse()
-#drawtree = reingold_tilford(root)
+# drawtree = reingold_tilford(root)
 # p(drawtree)

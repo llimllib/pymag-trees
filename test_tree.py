@@ -68,6 +68,7 @@ class TestNaryTree(TreeTest):
 class TestNaive(TestBinTree):
     def setUp(self):
         import reingold_naive
+
         self.f = reingold_naive.reingold_tilford
 
 
@@ -76,18 +77,21 @@ class TestThread(TestBinTree):
     #      that does. (See r116, reingold_thread.py)
     def setUp(self):
         import reingold_thread
+
         self.f = reingold_thread.reingold_tilford
 
 
 class TestAddMod(TestBinTree):
     def setUp(self):
         import reingold_addmod
+
         self.f = reingold_addmod.layout
 
 
 class TestBuchheim(TestBinTree, TestNaryTree):
     def setUp(self):
         import buchheim
+
         self.f = buchheim.buchheim
 
 

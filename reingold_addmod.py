@@ -16,6 +16,7 @@ class DrawTree:
     def right(self):
         return self.thread or len(self.children) and self.children[-1]
 
+
 # traverse to the bottom of the tree, and place the leaves at an arbitrary
 #   x coordinate
 # if the node is a parent, draw its subtrees, then shift the right one as close
@@ -53,12 +54,12 @@ def reingold_tilford(tree, depth=0):
     dt.x = fix_subtrees(left, right)
     return dt
 
+
 # place the right subtree as close to the left subtree as possible
 
 
 def fix_subtrees(left, right):
-    li, ri, diff, loffset, roffset, lo, ro \
-        = contour(left, right)
+    li, ri, diff, loffset, roffset, lo, ro = contour(left, right)
     diff += 1
     diff += (right.x + diff + left.x) % 2  # stick to the integers
 
@@ -79,15 +80,16 @@ def fix_subtrees(left, right):
     return (left.x + right.x) / 2
 
 
-def contour(left,
-            right,
-            max_offset=None,
-            loffset=0,
-            roffset=0,
-            left_outer=None,
-            right_outer=None):
-    if not max_offset \
-            or left.x + loffset - (right.x + roffset) > max_offset:
+def contour(
+    left,
+    right,
+    max_offset=None,
+    loffset=0,
+    roffset=0,
+    left_outer=None,
+    right_outer=None,
+):
+    if not max_offset or left.x + loffset - (right.x + roffset) > max_offset:
         max_offset = left.x + loffset - (right.x + roffset)
 
     if not left_outer:
@@ -106,6 +108,7 @@ def contour(left,
         return contour(li, ri, max_offset, loffset, roffset, lo, ro)
 
     return li, ri, max_offset, loffset, roffset, left_outer, right_outer
+
 
 # given an array of nodes, print them out reasonably on one line
 
@@ -133,6 +136,7 @@ def p(tree):
 
 
 if __name__ == "__main__":
+
     def mirror(t):
         if len(t.children) > 1:
             t.children = (t.children[1], t.children[0])
@@ -141,6 +145,7 @@ if __name__ == "__main__":
         return t
 
     from demo_trees import trees
+
     layout(mirror(trees[10]))
 
 # root = gentree("/Users/llimllib/Movies")

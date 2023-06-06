@@ -10,6 +10,7 @@ class DrawTree:
         self.tree = tree
         self.children = []
 
+
 # traverse to the bottom of the tree, and place the leaves at an arbitrary
 #   x coordinate
 # if the node is a parent, draw its subtrees, then shift the right one as close
@@ -34,6 +35,7 @@ def reingold_tilford(tree, depth=0):
     dt.children = [left, right]
     dt.x = fix_subtrees(left, right)
     return dt
+
 
 # place the right subtree as close to the left subtree as possible
 
@@ -68,6 +70,7 @@ def contour(tree, comp, level=0, cont=None):
 
     return cont
 
+
 # given an array of nodes, print them out reasonably on one line
 
 
@@ -92,6 +95,7 @@ def p(tree):
         if not newlevel:
             break
         level = newlevel
+
 
 # root = gentree("/Users/llimllib/Movies")
 # root.children.reverse()

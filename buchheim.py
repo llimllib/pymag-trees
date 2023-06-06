@@ -3,12 +3,12 @@ from PIL import Image, ImageDraw
 
 class DrawTree(object):
     def __init__(self, tree, parent=None, depth=0, number=1):
-        self.x = -1.
+        self.x = -1.0
         self.y = depth
         self.tree = tree
-        self.children = [DrawTree(c, self, depth + 1, i + 1)
-                         for i, c
-                         in enumerate(tree.children)]
+        self.children = [
+            DrawTree(c, self, depth + 1, i + 1) for i, c in enumerate(tree.children)
+        ]
         self.parent = parent
         self.thread = None
         self.mod = 0
@@ -35,10 +35,10 @@ class DrawTree(object):
         return n
 
     def get_lmost_sibling(self):
-        if not self._lmost_sibling and self.parent and self != \
-                self.parent.children[0]:
+        if not self._lmost_sibling and self.parent and self != self.parent.children[0]:
             self._lmost_sibling = self.parent.children[0]
         return self._lmost_sibling
+
     lmost_sibling = property(get_lmost_sibling)
 
     def __str__(self):
@@ -62,12 +62,12 @@ def third_walk(tree, n):
         third_walk(c, n)
 
 
-def firstwalk(v, distance=1.):
+def firstwalk(v, distance=1.0):
     if len(v.children) == 0:
         if v.lmost_sibling:
             v.x = v.lbrother().x + distance
         else:
-            v.x = 0.
+            v.x = 0.0
     else:
         default_ancestor = v.children[0]
         for w in v.children:
@@ -128,8 +128,7 @@ def apportion(v, default_ancestor, distance):
 
 def move_subtree(wl, wr, shift):
     subtrees = wr.number - wl.number
-    print(wl.tree, "is conflicted with", wr.tree,
-          'moving', subtrees, 'shift', shift)
+    print(wl.tree, "is conflicted with", wr.tree, "moving", subtrees, "shift", shift)
     # print wl, wr, wr.number, wl.number, shift, subtrees, shift/subtrees
     wr.change -= shift / subtrees
     wr.shift += shift
@@ -178,23 +177,31 @@ SPACING_HORIZONTAL = DIAMETER * 1.5
 
 def drawt(draw, root, depth):
     global DIAMETER
-    draw.ellipse([root.x * SPACING_HORIZONTAL,
-                  depth * SPACING_VERTICAL,
-                  root.x * SPACING_HORIZONTAL + DIAMETER,
-                  depth * SPACING_VERTICAL + DIAMETER],
-                 fill=(225),
-                 outline=(0))
+    draw.ellipse(
+        [
+            root.x * SPACING_HORIZONTAL,
+            depth * SPACING_VERTICAL,
+            root.x * SPACING_HORIZONTAL + DIAMETER,
+            depth * SPACING_VERTICAL + DIAMETER,
+        ],
+        fill=(225),
+        outline=(0),
+    )
     for child in root.children:
         drawt(draw, child, depth + 1)
 
 
 def drawconn(draw, root, depth):
     for child in root.children:
-        draw.line([root.x * SPACING_HORIZONTAL + (DIAMETER / 2),
-                   depth * SPACING_VERTICAL + (DIAMETER / 2),
-                   child.x * SPACING_HORIZONTAL + (DIAMETER / 2),
-                   (depth + 1) * SPACING_VERTICAL + (DIAMETER / 2)],
-                  fill=(0))
+        draw.line(
+            [
+                root.x * SPACING_HORIZONTAL + (DIAMETER / 2),
+                depth * SPACING_VERTICAL + (DIAMETER / 2),
+                child.x * SPACING_HORIZONTAL + (DIAMETER / 2),
+                (depth + 1) * SPACING_VERTICAL + (DIAMETER / 2),
+            ],
+            fill=(0),
+        )
         drawconn(draw, child, depth + 1)
 
 
