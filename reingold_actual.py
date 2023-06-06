@@ -7,11 +7,12 @@ class DrawTree(object):
         self.thread = None
         self.offset = 0
 
-    def left(self): 
+    def left(self):
         return self.thread or len(self.children) and self.children[0]
 
     def right(self):
         return self.thread or len(self.children) and self.children[-1]
+
 
 class Extreme(object):
     def __init__(self, tree, level, offset):
@@ -19,12 +20,16 @@ class Extreme(object):
         self.level = level
         self.offset = offset
 
+
 def layout(tree):
     setup(DrawTree(tree), 0, None, None)
 
+
 minsep = 1
+
+
 def setup(T, level, rmost, lmost):
-    if T is None: 
+    if T is None:
         rmost = lmost = -1
         return
 
@@ -33,10 +38,10 @@ def setup(T, level, rmost, lmost):
     R = T.right()
 
     LL = LR = RR = RL = None
-    setup(L, level+1, LR, LL)
-    setup(R, level+1, RR, RL)
+    setup(L, level + 1, LR, LL)
+    setup(R, level + 1, RR, RL)
 
-    #T is a leaf
+    # T is a leaf
     if not R and not L:
         rmost = Extreme(T, level, 0)
         lmost = Extreme(T, level, 0)
@@ -71,7 +76,7 @@ def setup(T, level, rmost, lmost):
     loffsum -= T.offset
     roffsum += T.offset
 
-    #XXX: why aren't RL and LL always None?
+    # XXX: why aren't RL and LL always None?
     if RL.level > LL.level or not T.left():
         lmost = RL
         lmost.offset += T.offset
@@ -88,7 +93,7 @@ def setup(T, level, rmost, lmost):
 
     if L and L != T.left():
         RR.tree.offset = abs(RR.offset + T.offset - loffsum)
-        RR.tree.thread = L              #XXX:is .thread == llink and rlink?
+        RR.tree.thread = L  # XXX:is .thread == llink and rlink?
     elif R and R != T.right():
         LL.tree.offset = abs(LL.offset - T.offset - roffsum)
         LL.tree.thread = R

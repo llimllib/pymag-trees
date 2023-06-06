@@ -5,13 +5,16 @@ class DrawTree(object):
         self.tree = tree
         self.children = [DrawTree(t) for t in tree]
 
+
 def layout(tree):
     dt = DrawTree(tree)
     setup(dt)
     return dt
 
+
 def setup(tree, depth=0, nexts=None):
-    if not nexts: nexts = []
+    if not nexts:
+        nexts = []
 
     try:
         next = nexts[depth]
@@ -23,4 +26,4 @@ def setup(tree, depth=0, nexts=None):
     tree.x = next
     tree.y = depth
     for c in tree.children:
-        setup(c, depth+1, nexts)
+        setup(c, depth + 1, nexts)
