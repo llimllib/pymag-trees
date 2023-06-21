@@ -78,7 +78,7 @@ def minimum_ws(tree, depth=0):
     tree.y = depth
     nexts[depth] += 1
     for c in tree.children:
-        minimum_ws(tree, c)
+        minimum_ws(c, depth+1)
 </pre>
 <p class="ceresIndent">Although it satisfies all of our principles, perhaps you will agree that the output is ugly. Even on a simple example such as that in Figure 3, it&#039;s difficult to quickly ascertain the relationships between the nodes, and the whole thing seems smooshed together. It&#039;s about time we introduce another principle that would help clean up both the Knuth tree and the minimum width tree:</p>
 <p class="ceresIndent"><strong>Principle 4</strong>: <i> A parent should be centered over its children.</i></p>
